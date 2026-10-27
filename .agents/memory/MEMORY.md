@@ -1,0 +1,1 @@
+- [GotecxPOS market scope](gotecx-pos-market-scope.md) — Liberia-first POS, defaulting to LRD while supporting USD and multiple business types.
