@@ -100,9 +100,20 @@ function App() {
 
 function AuthPage({path,setPath,setStore,notify}:{path:string;setPath:(p:string)=>void;setStore:(s:Store)=>void;notify:(s:string)=>void}) {
   const register=path==='/register';
-  const submit=(e:FormEvent<HTMLFormElement>)=>{e.preventDefault();const fd=new FormData(e.currentTarget);const email=String(fd.get('email')||'');const name=String(fd.get('name')||email.split('@')[0]||'Shop owner');const businessName=register?String(fd.get('business')||''):'My demo shop';const business:Business={id:id(),name:businessName,category:String(fd.get('category')||'Retail'),country:'Liberia',county:String(fd.get('county')||'Montserrado'),city:String(fd.get('city')||'Monrovia'),currency:'LRD',timezone:'Africa/Monrovia'};
+  const [emailStep,setEmailStep]=useState(false);
+  const [emailAddress,setEmailAddress]=useState('');
+  const submit=(e:FormEvent<HTMLFormElement>)=>{
+    e.preventDefault();
+    const fd=new FormData(e.currentTarget);
+    const email=String(fd.get('email')||emailAddress).trim();
+    if(!register&&!emailStep){setEmailAddress(email);setEmailStep(true);return;}
+    const name=String(fd.get('name')||email.split('@')[0]||'Shop owner');
+    const businessName=register?String(fd.get('business')||''):'My demo shop';
+    const business:Business={id:id(),name:businessName,category:String(fd.get('category')||'Retail'),country:'Liberia',county:String(fd.get('county')||'Montserrado'),city:String(fd.get('city')||'Monrovia'),currency:'LRD',timezone:'Africa/Monrovia'};
     const user:TeamMember={id:id(),name,email,role:'owner'};
-    const store:Store={business,user,products:register?demoProducts:[],customers:register?[{id:'c1',name:'Massa K. Johnson',phone:'+231 77 234 9182',email:'massa@example.com',county:'Montserrado',notes:'Regular customer'},{id:'c2',name:'Samuel Toe',phone:'+231 88 510 2731',email:'',county:'Margibi',notes:''}]:[],orders:register?seedOrders:[],discounts:[],team:[user],settings:{}};setStore(store);setPath('/home');notify(register?'Your Liberia store is ready.':'Welcome back to your demo workspace.');};
+    const store:Store={business,user,products:register?demoProducts:[],customers:register?[{id:'c1',name:'Massa K. Johnson',phone:'+231 77 234 9182',email:'massa@example.com',county:'Montserrado',notes:'Regular customer'},{id:'c2',name:'Samuel Toe',phone:'+231 88 510 2731',email:'',county:'Margibi',notes:''}]:[],orders:register?seedOrders:[],discounts:[],team:[user],settings:{}};
+    setStore(store);setPath('/home');notify(register?'Your Liberia store is ready.':'Welcome back to your demo workspace.');
+  };
   return (
     <main className="auth-page">
       <section className="auth-card">
@@ -111,8 +122,8 @@ function AuthPage({path,setPath,setStore,notify}:{path:string;setPath:(p:string)
           <span>Gotecx<span className="brand-product">POS</span></span>
         </div>
         <div className="auth-form">
-          <h2>{register ? 'Create your store' : 'Sign in to GotecxPOS'}</h2>
-          <p>{register ? 'Set up your business in Liberia.' : 'Sign in to your business workspace.'}</p>
+          <h2>{register ? 'Create your store' : emailStep ? 'Welcome back' : 'Log in'}</h2>
+          <p>{register ? 'Continue to GotecxPOS' : 'Continue to GotecxPOS'}</p>
           <form onSubmit={submit}>
             {register && (
               <>
@@ -149,41 +160,60 @@ function AuthPage({path,setPath,setStore,notify}:{path:string;setPath:(p:string)
                 </div>
               </>
             )}
-            <div className="field">
-              <label>Email address</label>
-              <input type="email" name="email" required placeholder="you@example.com" autoComplete="email" />
-            </div>
-            <div className="field">
-              <label>{register ? 'Choose a demo password' : 'Password'}</label>
-              <input
-                type="password"
-                name="password"
-                required
-                placeholder="At least 8 characters"
-                autoComplete={register ? 'new-password' : 'current-password'}
-              />
-            </div>
-            <button className="button primary auth-submit" type="submit">
-              {register ? 'Create local workspace' : 'Sign in'}
+            {register || !emailStep ? (
+              <div className="field">
+                <label>Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  value={emailAddress}
+                  onChange={(event) => setEmailAddress(event.target.value)}
+                />
+              </div>
+            ) : (
+              <div className="auth-email-row">
+                <span>{emailAddress}</span>
+                <button type="button" onClick={() => setEmailStep(false)}>Change</button>
+              </div>
+            )}
+            {(register || emailStep) && (
+              <div className="field">
+                <label>{register ? 'Choose a demo password' : 'Password'}</label>
+                <input
+                  type="password"
+                  name="password"
+                  required
+                  placeholder="At least 8 characters"
+                  autoComplete={register ? 'new-password' : 'current-password'}
+                />
+              </div>
+            )}
+            <button className={`button ${register ? 'primary' : 'auth-submit'}`} type="submit">
+              {register ? 'Create local workspace' : emailStep ? 'Continue' : 'Continue with email'}
             </button>
           </form>
+          <div className="auth-divider"><span>or</span></div>
           <div className="auth-switch">
             {register ? 'Already have a workspace?' : 'New to Gotecx?'}{' '}
             <a
               href={register ? '/login' : '/register'}
               onClick={(event) => {
                 event.preventDefault();
+                setEmailStep(false);
                 setPath(register ? '/login' : '/register');
               }}
             >
-              {register ? 'Sign in' : 'Create your store'}
+              {register ? 'Log in' : 'Create your store'}
             </a>
-          </div>
-          <div className="notice">
-            Demo only. Passwords are never stored or verified. Your workspace data stays in this browser’s local storage and is not secure or shared across devices.
           </div>
         </div>
       </section>
+      <p className="auth-footer">
+        Demo only. Passwords are never stored or verified. Workspace data stays in this browser and is not shared across devices.
+      </p>
     </main>
   );
 }
