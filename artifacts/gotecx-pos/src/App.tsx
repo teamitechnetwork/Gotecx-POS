@@ -103,7 +103,89 @@ function AuthPage({path,setPath,setStore,notify}:{path:string;setPath:(p:string)
   const submit=(e:FormEvent<HTMLFormElement>)=>{e.preventDefault();const fd=new FormData(e.currentTarget);const email=String(fd.get('email')||'');const name=String(fd.get('name')||email.split('@')[0]||'Shop owner');const businessName=register?String(fd.get('business')||''):'My demo shop';const business:Business={id:id(),name:businessName,category:String(fd.get('category')||'Retail'),country:'Liberia',county:String(fd.get('county')||'Montserrado'),city:String(fd.get('city')||'Monrovia'),currency:'LRD',timezone:'Africa/Monrovia'};
     const user:TeamMember={id:id(),name,email,role:'owner'};
     const store:Store={business,user,products:register?demoProducts:[],customers:register?[{id:'c1',name:'Massa K. Johnson',phone:'+231 77 234 9182',email:'massa@example.com',county:'Montserrado',notes:'Regular customer'},{id:'c2',name:'Samuel Toe',phone:'+231 88 510 2731',email:'',county:'Margibi',notes:''}]:[],orders:register?seedOrders:[],discounts:[],team:[user],settings:{}};setStore(store);setPath('/home');notify(register?'Your Liberia store is ready.':'Welcome back to your demo workspace.');};
-  return <div className="auth-page"><section className="auth-story"><div className="brand" style={{padding:0}}><div className="brand-mark">G</div> gotecx<span style={{fontWeight:400,color:'#9eaaa4'}}>POS</span></div><div><div style={{font:'11px var(--app-font-mono)',color:'#8dc6a3',letterSpacing:1.5,marginBottom:20}}>BUILT FOR BUSINESS IN LIBERIA</div><h1>Good business,<br/><em>made simpler.</em></h1><p>Keep your shop moving. Know what sold, what is running low, and what your customers come back for.</p></div><div style={{fontSize:11,color:'#91a19a'}}>Local commerce, with a clearer view.</div></section><section className="auth-content"><div className="auth-form"><h2>{register?'Create your store':'Sign in to Gotecx'}</h2><p>{register?'A practical workspace for your business in Liberia.':'Pick up where your business left off.'}</p><form onSubmit={submit}>{register&&<><div className="field"><label>Your name</label><input name="name" required placeholder="e.g. Josephine Doe"/></div><div className="field"><label>Business name</label><input name="business" required placeholder="e.g. Waterside Market Shop"/></div><div className="field"><label>Business type</label><select name="category"><option>Retail</option><option>Food & beverage</option><option>Beauty & personal care</option><option>Professional services</option><option>Handmade goods</option><option>Other</option></select></div><div className="form-grid"><div className="field"><label>County</label><select name="county">{counties.map(c=><option key={c}>{c}</option>)}</select></div><div className="field"><label>City / town</label><input name="city" defaultValue="Monrovia"/></div></div></>}<div className="field"><label>Email address</label><input type="email" name="email" required placeholder="you@example.com"/></div><div className="field"><label>{register?'Choose a demo password':'Password'}</label><input type="password" name="password" required placeholder="At least 8 characters"/></div><button className="button primary" style={{width:'100%',marginTop:4}}>{register?'Create local workspace':'Sign in'}</button></form><div className="auth-switch">{register?'Already have a workspace?':'New to Gotecx?'} <a href={register?'/login':'/register'} onClick={e=>{e.preventDefault();setPath(register?'/login':'/register')}}>{register?'Sign in':'Create your store'}</a></div><div className="notice">Demo only. Passwords are never stored or verified. Your workspace data stays in this browser’s local storage and is not secure or shared across devices.</div></div></section></div>;
+  return (
+    <main className="auth-page">
+      <section className="auth-card">
+        <div className="auth-brand">
+          <div className="brand-mark">G</div>
+          <span>Gotecx<span className="brand-product">POS</span></span>
+        </div>
+        <div className="auth-form">
+          <h2>{register ? 'Create your store' : 'Sign in to GotecxPOS'}</h2>
+          <p>{register ? 'Set up your business in Liberia.' : 'Sign in to your business workspace.'}</p>
+          <form onSubmit={submit}>
+            {register && (
+              <>
+                <div className="field">
+                  <label>Your name</label>
+                  <input name="name" required placeholder="e.g. Josephine Doe" />
+                </div>
+                <div className="field">
+                  <label>Business name</label>
+                  <input name="business" required placeholder="e.g. Waterside Market Shop" />
+                </div>
+                <div className="field">
+                  <label>Business type</label>
+                  <select name="category">
+                    <option>Retail</option>
+                    <option>Food & beverage</option>
+                    <option>Beauty & personal care</option>
+                    <option>Professional services</option>
+                    <option>Handmade goods</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div className="form-grid">
+                  <div className="field">
+                    <label>County</label>
+                    <select name="county">
+                      {counties.map((county) => <option key={county}>{county}</option>)}
+                    </select>
+                  </div>
+                  <div className="field">
+                    <label>City / town</label>
+                    <input name="city" defaultValue="Monrovia" />
+                  </div>
+                </div>
+              </>
+            )}
+            <div className="field">
+              <label>Email address</label>
+              <input type="email" name="email" required placeholder="you@example.com" autoComplete="email" />
+            </div>
+            <div className="field">
+              <label>{register ? 'Choose a demo password' : 'Password'}</label>
+              <input
+                type="password"
+                name="password"
+                required
+                placeholder="At least 8 characters"
+                autoComplete={register ? 'new-password' : 'current-password'}
+              />
+            </div>
+            <button className="button primary auth-submit" type="submit">
+              {register ? 'Create local workspace' : 'Sign in'}
+            </button>
+          </form>
+          <div className="auth-switch">
+            {register ? 'Already have a workspace?' : 'New to Gotecx?'}{' '}
+            <a
+              href={register ? '/login' : '/register'}
+              onClick={(event) => {
+                event.preventDefault();
+                setPath(register ? '/login' : '/register');
+              }}
+            >
+              {register ? 'Sign in' : 'Create your store'}
+            </a>
+          </div>
+          <div className="notice">
+            Demo only. Passwords are never stored or verified. Your workspace data stays in this browser’s local storage and is not secure or shared across devices.
+          </div>
+        </div>
+      </section>
+    </main>
+  );
 }
 
 function PageHead({title,subtitle,action}:{title:string;subtitle:string;action?:ReactNode}) {return <div className="page-head"><div><h1 className="page-title">{title}</h1><p className="page-subtitle">{subtitle}</p></div>{action}</div>}
